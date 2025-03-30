@@ -19,3 +19,17 @@ Bu kütüphaneleri aşağıdaki komutla yükleyebilirsiniz:
 ```bash
 pip install numpy matplotlib scipy
 ```
+
+## Nasıl Çalıştırılır?
+
+`tdoa_analiz.py` dosyasının bulunduğu klasörde olduğunuzdan emin olduktan sonra aşağıdaki komutu terminal veya komut istemcisine yazmanız yeterlidir:
+
+- **Windows için:**
+  ```bash
+  python tdoa_analiz.py
+  ```
+
+- **macOS için:**
+  ```bash
+  python3 tdoa_analiz.py
+  ```
