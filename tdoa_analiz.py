@@ -4,6 +4,8 @@ import scipy.signal as signal
 import scipy.io.wavfile as wav
 import math
 
+import gcc_function as gcc
+
 # Güncellenmiş GCC-PHAT ile TDOA Hesaplama
 def gcc_phat(x1, x2, fs):
     N = max(len(x1), len(x2))
@@ -101,7 +103,7 @@ def main():
     plt.show()
 
     # TDOA Hesaplama (Yan yana mikrofon çiftleri için)
-    time_delay_estimate = np.array([gcc_phat(mic_signals[i], mic_signals[i+1], fs) for i in range(N-1)])
+    time_delay_estimate = np.array([gcc.gcc_weighted(mic_signals[i], mic_signals[i+1], fs, 'phat') for i in range(N-1)])
 
     # DEBUG --------------------------------------------------------------------------------------
     print(f"Gerçek Zaman Farkları: {tau_i_s}")
