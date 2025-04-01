@@ -4,23 +4,26 @@ import scipy.signal as signal
 import scipy.io.wavfile as wav
 import math
 
+
+# User Functions
 import gcc_function as gcc
+import custom_plot as plotter
 
-# Güncellenmiş GCC-PHAT ile TDOA Hesaplama
-def gcc_phat(x1, x2, fs):
-    N = max(len(x1), len(x2))
-    X1 = np.fft.fft(x1, n=N)
-    X2 = np.fft.fft(x2, n=N)
-    R = X1 * np.conj(X2)
-    R /= np.abs(R + 1e-10)  # Küçük değer ekleyerek sıfıra bölmeyi engelle
+# # Güncellenmiş GCC-PHAT ile TDOA Hesaplama
+# def gcc_phat(x1, x2, fs):
+#     N = max(len(x1), len(x2))
+#     X1 = np.fft.fft(x1, n=N)
+#     X2 = np.fft.fft(x2, n=N)
+#     R = X1 * np.conj(X2)
+#     R /= np.abs(R + 1e-10)  # Küçük değer ekleyerek sıfıra bölmeyi engelle
     
-    r = np.fft.ifft(R).real
-    r = np.fft.fftshift(r)  # Çapraz korelasyonu sıfır merkezli hale getir
+#     r = np.fft.ifft(R).real
+#     r = np.fft.fftshift(r)  # Çapraz korelasyonu sıfır merkezli hale getir
 
-    lags = np.arange(-N//2, N//2) / fs  # Gecikmelerin ölçeklenmesi
-    max_idx = np.argmax(np.abs(r))
-    print(max_idx)
-    return lags[N-max_idx]
+#     lags = np.arange(-N//2, N//2) / fs  # Gecikmelerin ölçeklenmesi
+#     max_idx = np.argmax(np.abs(r))
+#     print(max_idx)
+#     return lags[N-max_idx]
 
 def calculate_sound_speed(temp_c):
     temp_k = temp_c + 273.15
@@ -91,19 +94,66 @@ def main():
         """
         mic_signals[i, :] = np.roll(source_signal, delay_samples)
 
-    # Mikrofon Sinyalleri Görselleştirme
-    plt.figure()
+
+    fig, ax = plt.subplots()
     for i in range(N):
-        plt.plot(t, mic_signals[i, :], label=f'Mikrofon {i+1}')
-    plt.xlabel('Zaman [s]')
-    plt.ylabel('Genlik')
-    plt.title('Mikrofonlara Ulaşan Sinyaller')
-    plt.legend()
-    plt.grid(True)
+        ax.plot(t, mic_signals[i, :], label=f'Mikrofon {i+1}')
+    
+    plotter.setup_custom_plot(
+    ax,
+    title='Ornek Grafik',
+    xlabel='Zaman [s]',
+    ylabel='Genlik',
+    major_tick_interval_x=0.5,
+    major_tick_interval_y=0.2,
+    font_size=14,
+    tick_rotation=45,
+    facecolor='whitesmoke'
+   )
     plt.show()
 
+    # # Mikrofon Sinyalleri Görselleştirme
+    # plt.figure()
+    # for i in range(N):
+    #     plt.plot(t, mic_signals[i, :], label=f'Mikrofon {i+1}')
+    # plt.xlabel('Zaman [s]')
+    # plt.ylabel('Genlik')
+    # plt.title('Mikrofonlara Ulaşan Sinyaller')
+    # plt.legend()
+    # plt.grid(True)
+    # plt.show()
+
     # TDOA Hesaplama (Yan yana mikrofon çiftleri için)
-    time_delay_estimate = np.array([gcc.gcc_weighted(mic_signals[i], mic_signals[i+1], fs, 'phat') for i in range(N-1)])
+    # time_delay_estimate, r, lags = np.array([gcc.gcc_weighted(mic_signals[i], mic_signals[i+1], fs, 'phat') for i in range(N-1)])
+
+
+    tdoas = []
+    rs = []
+    lags_list = []
+
+    for i in range(N - 1):
+        tdoa, r, lags = gcc.gcc_weighted(mic_signals[i], mic_signals[i+1], fs, 'phat')
+        tdoas.append(tdoa)
+        rs.append(r)
+        lags_list.append(lags)
+
+    time_delay_estimate = tdoas
+
+    # TODO: rs degeleri daha saglikli toplanacak ve tek bir plotta gosterilecek
+    # TODO: kod düzenlecenek
+    fig, ax = plt.subplots()
+    ax.plot(lags, rs[1], label=f'Mikrofon {1}')
+    
+    plotter.setup_custom_plot(
+    ax,
+    title='Ornek Grafik',
+    xlabel='Zaman [s]',
+    ylabel='Genlik',
+    font_size=14,
+    tick_rotation=45,
+    facecolor='whitesmoke'
+   )
+    plt.show()
 
     # DEBUG --------------------------------------------------------------------------------------
     print(f"Gerçek Zaman Farkları: {tau_i_s}")

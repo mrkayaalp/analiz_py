@@ -160,4 +160,5 @@ def gcc_weighted(x1, x2, fs, weighting='phat'):
     lags = np.arange(-N//2, N//2) / fs  # Gecikmelerin ölçeklenmesi (saniye cinsinden)
     max_idx = np.argmax(np.abs(r))
     print(max_idx)
-    return lags[N-max_idx]
+    tdoa = lags[N-max_idx]
+    return tdoa, r, lags
