@@ -9,6 +9,10 @@ import math
 import gcc_function as gcc
 import custom_plot as plotter
 
+linestyle_str = ['-', '--', ':' , '-.']
+marker_str = ['o', 's', '^', 'd']
+
+
 # # Güncellenmiş GCC-PHAT ile TDOA Hesaplama
 # def gcc_phat(x1, x2, fs):
 #     N = max(len(x1), len(x2))
@@ -104,11 +108,11 @@ def main():
     title='Ornek Grafik',
     xlabel='Zaman [s]',
     ylabel='Genlik',
-    major_tick_interval_x=0.5,
-    major_tick_interval_y=0.2,
+    # major_tick_interval_x=0.5,
+    # major_tick_interval_y=0.2,
     font_size=14,
     tick_rotation=45,
-    facecolor='whitesmoke'
+    facecolor='white'
    )
     plt.show()
 
@@ -127,26 +131,40 @@ def main():
     # time_delay_estimate, r, lags = np.array([gcc.gcc_weighted(mic_signals[i], mic_signals[i+1], fs, 'phat') for i in range(N-1)])
 
 
+    # List
     tdoas = []
     rs = []
     lags_list = []
 
+
+    """
+    NOT: Burda daha etkili bir gorsel için her bir gcc'yi referan mikrofona göre hesaplatabilirim ve bunu sergileyebilirim.
+    Ama sonuç her iki mikrofon çifti için hesaplamada dogru çikmatadir.
+    """
     for i in range(N - 1):
         tdoa, r, lags = gcc.gcc_weighted(mic_signals[i], mic_signals[i+1], fs, 'phat')
+
+    
         tdoas.append(tdoa)
         rs.append(r)
         lags_list.append(lags)
 
-    time_delay_estimate = tdoas
+    time_delay_estimate = np.array(tdoas)
 
     # TODO: rs degeleri daha saglikli toplanacak ve tek bir plotta gosterilecek
     # TODO: kod düzenlecenek
+
+    
     fig, ax = plt.subplots()
-    ax.plot(lags, rs[1], label=f'Mikrofon {1}')
+
+
+    # Her mikrofon çifti için GCC-PHAT sonuçlarını plot
+    for i in range(N - 1):
+        ax.plot(lags, rs[i], label=f'M{i+1}-M{i+2}', linestyle=linestyle_str[i], marker = marker_str[i],  linewidth=1.5, markersize=5) 
     
     plotter.setup_custom_plot(
     ax,
-    title='Ornek Grafik',
+    title='Mikrofon Çiftleri Arasındaki GCC-PHAT Sonuçları',
     xlabel='Zaman [s]',
     ylabel='Genlik',
     font_size=14,
